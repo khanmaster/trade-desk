@@ -5,14 +5,19 @@
 resource "github_repository_environment" "dev" {
   repository  = github_repository.trade_desk.name
   environment = "dev"
+
+  lifecycle {
+    ignore_changes = [reviewers, deployment_branch_policy]
+  }
 }
 
 resource "github_repository_environment" "prod" {
   repository  = github_repository.trade_desk.name
   environment = "prod"
 
-  # NOTE: Terraform GitHub provider does not support setting required reviewers
-  # You MUST manually add required reviewers in GitHub UI after terraform apply
+  lifecycle {
+    ignore_changes = [reviewers, deployment_branch_policy]
+  }
 }
 
 # ── DEV environment variables ─────────────────────────────────────────────────
