@@ -11,6 +11,15 @@ on:
           - plan
           - apply
 
+# NOTE: This workflow requires terraform.tfstate to be present.
+# State is managed locally. Run Terraform from your local machine:
+#
+#   cd infra/terraform
+#   terraform plan  -var="github_token=<your-token>"
+#   terraform apply -var="github_token=<your-token>"
+#
+# This workflow is reserved for future use when remote state is configured.
+
 jobs:
   terraform:
     name: Terraform ${{ github.event.inputs.action }}
@@ -32,6 +41,15 @@ jobs:
         working-directory: infra/terraform
         run: terraform init
 
+      - name: Warn if no state file
+        working-directory: infra/terraform
+        run: |
+          if [ ! -f terraform.tfstate ]; then
+            echo "⚠️  WARNING: No terraform.tfstate found."
+            echo "This plan will show all resources as new even if they already exist."
+            echo "Run Terraform locally where state is present."
+          fi
+
       - name: Terraform Plan
         if: github.event.inputs.action == 'plan' || github.event.inputs.action == 'apply'
         working-directory: infra/terraform
@@ -43,7 +61,7 @@ jobs:
         with:
           name: tfplan-${{ github.run_id }}
           path: infra/terraform/tfplan
-          retention-days: 7
+          retention-days: 90
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
