@@ -1,0 +1,5 @@
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is gitignored — never commit it
+
+github_owner = "KhanMaster>"
+repo_name    = "trade-desk"

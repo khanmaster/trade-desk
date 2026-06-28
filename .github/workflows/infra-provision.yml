@@ -1,0 +1,51 @@
+name: Infra Provision
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to run"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.action }}
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_github_token: ${{ secrets.TF_GITHUB_TOKEN }}
+      TF_VAR_github_owner: ${{ vars.REPO_OWNER }}
+      TF_VAR_repo_name:    ${{ vars.REPO_NAME }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        if: github.event.inputs.action == 'plan' || github.event.inputs.action == 'apply'
+        working-directory: infra/terraform
+        run: terraform plan -out=tfplan
+
+      - name: Upload plan artifact
+        if: github.event.inputs.action == 'plan' || github.event.inputs.action == 'apply'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ github.run_id }}
+          path: infra/terraform/tfplan
+          retention-days: 7
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve tfplan
