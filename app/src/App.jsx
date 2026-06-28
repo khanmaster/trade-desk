@@ -9,7 +9,7 @@ export default function App() {
   return (
     <BrowserRouter basename={config.basePath}>
       <nav className="nav">
-        <span className="logo">📈 StockMVP</span>
+        <span className="logo">📈 Trade Desk</span>
         <NavLink to="/" end>Dashboard</NavLink>
         <NavLink to="/portfolio">Portfolio</NavLink>
         <NavLink to="/trade">Trade</NavLink>
